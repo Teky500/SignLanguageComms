@@ -1,1 +1,3 @@
 kivy
+bs4
+selenium

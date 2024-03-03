@@ -8,6 +8,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.graphics import Color, Rectangle
 import os
 from image_file import create_image_layout
+
+from backend import translate_words
+from kivy.clock import Clock
+import time
+from functools import partial
 from speech_to_text import record_and_convert
 
 class ASLInterpreterApp(App):
@@ -15,6 +20,14 @@ class ASLInterpreterApp(App):
         self.sm = ScreenManager()
 
         # First screen
+        self.buildScr()
+
+        # Second screen
+
+
+        return self.sm
+    def buildScr(self):
+        global screen1
         screen1 = Screen(name='screen1')
         layout1 = BoxLayout(orientation='vertical', spacing=10, padding=20)
         # ... add your widgets to layout1 ...
@@ -56,20 +69,29 @@ class ASLInterpreterApp(App):
         screen1.add_widget(layout1)
         self.sm.add_widget(screen1)
 
-        # Second screen
-        screen2 = Screen(name='screen2')
-        layout2 = create_image_layout()
-        screen2.add_widget(layout2)
-        self.sm.add_widget(screen2)
-
-        return self.sm
-
     def _update_rect(self, instance, value):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
+    def do_nothing(self, dt):
+        pass
 
     def on_translate(self, instance):
-        # Switch to the new page
+        te = self.text_input.text
+        img = translate_words(te)
+        counter = 0
+        for i in img:
+            Clock.schedule_once(partial(self.do_stuff, i), counter)
+            counter += 1
+        Clock.schedule_once(self.ret, counter+3)
+    def ret(self, *largs):
+        self.buildScr()
+        self.sm.current = 'screen1'
+    def do_stuff(self, im, *largs):
+        self.sm.clear_widgets()
+        screen2 = Screen(name='screen2')
+        layout2 = create_image_layout(im)
+        screen2.add_widget(layout2)
+        self.sm.add_widget(screen2)
         self.sm.current = 'screen2'
 
     def on_record(self, instance):

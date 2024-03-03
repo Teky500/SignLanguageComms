@@ -14,7 +14,8 @@ from kivy.clock import Clock
 import time
 from functools import partial
 from speech_to_text import record_and_convert
-
+import threading
+import time
 class ASLInterpreterApp(App):
     def build(self):
         self.sm = ScreenManager()
@@ -54,7 +55,7 @@ class ASLInterpreterApp(App):
             background_color=(0.2, 0.6, 0.8, 1),  # Light blue button color
             font_size=16,
         )
-        record_button.bind(on_press=self.on_record)
+        record_button.bind(on_press=self.thread_start)
         layout1.add_widget(record_button)
 
         translate_button = Button(
@@ -93,11 +94,17 @@ class ASLInterpreterApp(App):
         screen2.add_widget(layout2)
         self.sm.add_widget(screen2)
         self.sm.current = 'screen2'
+    def thread_start(self, instance):
+        self.record_thread = threading.Thread(target=self.on_record)
+        self.record_thread.start()
+        self.record_thread.join()
+        self.set_text()
+    def on_record(self):
 
-    def on_record(self, instance):
         # Record speech and convert to text
-        text = record_and_convert()
-        self.text_input.text = text
+        self.recorded_text = record_and_convert()
+    def set_text(self):
+        self.text_input.text = self.recorded_text
 
 
 if __name__ == '__main__':

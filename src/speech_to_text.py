@@ -6,7 +6,7 @@ def record_and_convert():
 
     with sr.Microphone() as source:
         print("Talk")
-        audio_text = r.listen(source)
+        audio_text = r.listen(source, 10 , 4)
         print("Time over, thanks")
 
     try:

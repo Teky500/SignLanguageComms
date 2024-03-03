@@ -1,21 +1,29 @@
+# main.py
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.image import Image
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.graphics import Color, Rectangle
+import os
+from image_file import create_image_layout
 
 class ASLInterpreterApp(App):
     def build(self):
-        layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
+        self.sm = ScreenManager()
 
-        # Create a label for the title
-        title_label = Label(text='English to ASL Translator', font_size=24, size_hint_y=None, height=50)
-        layout.add_widget(title_label)
+        # First screen
+        screen1 = Screen(name='screen1')
+        layout1 = BoxLayout(orientation='vertical', spacing=10, padding=20)
+        # ... add your widgets to layout1 ...
+        with layout1.canvas.before:
+            Color(1, 1, 1, 1)  # white
+            self.rect = Rectangle(size=layout1.size, pos=layout1.pos)
+        layout1.bind(size=self._update_rect, pos=self._update_rect)
 
-        # Create a text input box for English input
         self.text_input = TextInput(
-            hint_text='Enter an English phrase...',
+            hint_text='Enter sentence to translate here:',
             size_hint=(1, None),
             height=50,
             multiline=False,
@@ -23,9 +31,8 @@ class ASLInterpreterApp(App):
             foreground_color=(0.2, 0.2, 0.2, 1),  # Dark gray text color
             background_color=(0.9, 0.9, 0.9, 1),  # Light gray background
         )
-        layout.add_widget(self.text_input)
+        layout1.add_widget(self.text_input)
 
-        # Create a translate button
         translate_button = Button(
             text='Translate to ASL',
             size_hint=(1, None),
@@ -34,29 +41,26 @@ class ASLInterpreterApp(App):
             font_size=16,
         )
         translate_button.bind(on_press=self.on_translate)
-        layout.add_widget(translate_button)
+        layout1.add_widget(translate_button)
+        screen1.add_widget(layout1)
+        self.sm.add_widget(screen1)
 
-        """" Add ASL hand sign graphics (replace with actual ASL signs)
-        asl_signs_layout = BoxLayout(spacing=10)
+        # Second screen
+        screen2 = Screen(name='screen2')
+        layout2 = create_image_layout()
+        screen2.add_widget(layout2)
+        self.sm.add_widget(screen2)
 
-        asl_a_image = Image(source='path/to/asl_a.png', size_hint=(None, None), size=(100, 100))
-        asl_s_image = Image(source='path/to/asl_s.png', size_hint=(None, None), size=(100, 100))
-        asl_l_image = Image(source='path/to/asl_l.png', size_hint=(None, None), size=(100, 100))
+        return self.sm
 
-        asl_signs_layout.add_widget(asl_a_image)
-        asl_signs_layout.add_widget(asl_s_image)
-        asl_signs_layout.add_widget(asl_l_image)
-
-        layout.add_widget(asl_signs_layout) """
-
-        return layout
+    def _update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 
     def on_translate(self, instance):
-        # Get the English text from the input box
-        english_text = self.text_input.text
-        # TODO: Implement ASL translation logic here
-        asl_text = f"ASL: {english_text}"  # Placeholder for ASL translation
-        print(asl_text)
+        # Switch to the new page
+        self.sm.current = 'screen2'
+
 
 if __name__ == '__main__':
     ASLInterpreterApp().run()

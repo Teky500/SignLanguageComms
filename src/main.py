@@ -16,6 +16,10 @@ from functools import partial
 from speech_to_text import record_and_convert
 import threading
 import time
+from kivy.core.window import Window
+
+# Get the width and height of the screen
+
 class ASLInterpreterApp(App):
     def build(self):
         self.sm = ScreenManager()
@@ -48,15 +52,15 @@ class ASLInterpreterApp(App):
         )
         layout1.add_widget(self.text_input)
 
-        record_button = Button(
+        self.record_button = Button(
             text='Record Speech',
             size_hint=(1, None),
             height=50,
             background_color=(0.2, 0.6, 0.8, 1),  # Light blue button color
             font_size=16,
         )
-        record_button.bind(on_press=self.thread_start)
-        layout1.add_widget(record_button)
+        self.record_button.bind(on_press=self.thread_start)
+        layout1.add_widget(self.record_button)
 
         translate_button = Button(
             text='Translate to ASL',
@@ -96,6 +100,7 @@ class ASLInterpreterApp(App):
         self.sm.current = 'screen2'
     def thread_start(self, instance):
         self.record_thread = threading.Thread(target=self.on_record)
+        self.record_button.disabled = True
         self.record_thread.start()
         self.record_thread.join()
         self.set_text()
@@ -103,8 +108,10 @@ class ASLInterpreterApp(App):
 
         # Record speech and convert to text
         self.recorded_text = record_and_convert()
+        
     def set_text(self):
         self.text_input.text = self.recorded_text
+        self.record_button.disabled = False
 
 
 if __name__ == '__main__':

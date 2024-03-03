@@ -8,7 +8,8 @@ def define_map(init_path):
         let_map[Letter] = imgPath
     return let_map
 def translate_words(sentence):
-    w_map = define_map('src/images')
+    imgpath = os.path.join(os.getcwd(), 'images')
+    w_map = define_map(imgpath)
     sentence_by_words = sentence.split(' ')
     print(len(sentence_by_words))
     counter_1 = 0
